@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { Sky } from '../Journey/Sky';
-
+import { Ground } from '../Journey/Ground';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const Scene = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,15 +19,11 @@ const Scene = () => {
     try {
       // Initialize Scene
       sceneRef.current = new THREE.Scene();
+      sceneRef.current.fog = new THREE.FogExp2(0x000000, 0.001);
 
       // Initialize Camera
-      cameraRef.current = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-      );
-      cameraRef.current.position.set(0, 5, 10);
+      cameraRef.current = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      cameraRef.current.position.set(0, 5, 20);
       cameraRef.current.lookAt(0, 0, 0);
 
       // Initialize Renderer con fallbacks
@@ -47,39 +44,57 @@ const Scene = () => {
 
       rendererRef.current.setSize(window.innerWidth, window.innerHeight);
       rendererRef.current.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      rendererRef.current.setClearColor(0x000000);
       containerRef.current.appendChild(rendererRef.current.domElement);
 
-      // Crear y agregar el cielo
-      const sky = new Sky();
-      sky.scale.setScalar(450000);
+      // Initialize Controls
+      if (cameraRef.current && rendererRef.current) {
+        controlsRef.current = new OrbitControls(cameraRef.current, rendererRef.current.domElement);
+        controlsRef.current.enableDamping = true;
+        controlsRef.current.dampingFactor = 0.05;
+      }
 
-      // Configurar el sol
-      const uniforms = sky.material.uniforms;
-      uniforms['turbidity'].value = 10;
-      uniforms['rayleigh'].value = 2;
-      uniforms['mieCoefficient'].value = 0.005;
-      uniforms['mieDirectionalG'].value = 0.8;
+      // Agregar el suelo
+      const ground = new Ground(2000, 40);
+      sceneRef.current.add(ground.getMesh());
 
-      // Posición del sol
-      const sun = new THREE.Vector3();
-      const phi = THREE.MathUtils.degToRad(90);
-      const theta = THREE.MathUtils.degToRad(180);
-      sun.setFromSphericalCoords(1, phi, theta);
-      uniforms['sunPosition'].value.copy(sun);
+      // Crear objetos geométricos
+      const createShapes = () => {
+        const group = new THREE.Group();
+        const count = 100;
 
-      sceneRef.current.add(sky);
+        for (let i = 0; i < count; i++) {
+          const geometry = new THREE.BoxGeometry(Math.random() * 2 + 1, Math.random() * 2 + 1, Math.random() * 2 + 1);
 
-      // Agregar un plano para referencia
-      const planeGeometry = new THREE.PlaneGeometry(10, 10);
-      const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
-      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.rotation.x = -Math.PI / 2;
-      sceneRef.current.add(plane);
+          const hue = Math.random() * 360;
+          const color = new THREE.Color(`hsl(${hue}, 80%, 60%)`);
+          const material = new THREE.MeshStandardMaterial({
+            color,
+            metalness: 0.5,
+            roughness: 0.5,
+          });
 
-      // Agregar luces
-      const ambientLight = new THREE.AmbientLight(0x404040);
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.position.set(Math.random() * 200 - 100, Math.random() * 20 - 10, Math.random() * 500 - 250);
+
+          // Agregar propiedades para animación
+          mesh.userData.originalY = mesh.position.y;
+          mesh.userData.speed = Math.random() * 0.5 + 0.5;
+          mesh.userData.phase = Math.random() * Math.PI * 2;
+
+          group.add(mesh);
+        }
+
+        return group;
+      };
+
+      const shapes = createShapes();
+      sceneRef.current.add(shapes);
+
+      // Luces
+      const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
       const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(1, 1, 1);
+      directionalLight.position.set(10, 10, 5);
       sceneRef.current.add(ambientLight);
       sceneRef.current.add(directionalLight);
 
@@ -95,14 +110,31 @@ const Scene = () => {
       window.addEventListener('resize', handleResize);
 
       // Animation Loop
-      const animate = () => {
+      const animate = (time: number) => {
+        timeRef.current = time * 0.001;
+
+        if (controlsRef.current) {
+          controlsRef.current.update();
+        }
+
+        // Animar objetos
+        shapes.children.forEach((mesh) => {
+          const y = mesh.userData.originalY;
+          const speed = mesh.userData.speed;
+          const phase = mesh.userData.phase;
+          mesh.position.y = y + Math.sin(timeRef.current * speed + phase) * 2;
+          mesh.rotation.x += 0.01 * speed;
+          mesh.rotation.y += 0.01 * speed;
+        });
+
         if (rendererRef.current && sceneRef.current && cameraRef.current) {
           rendererRef.current.render(sceneRef.current, cameraRef.current);
         }
+
         requestAnimationFrame(animate);
       };
 
-      animate();
+      animate(0);
 
       // Cleanup
       return () => {
@@ -110,6 +142,7 @@ const Scene = () => {
         if (containerRef.current && rendererRef.current) {
           containerRef.current.removeChild(rendererRef.current.domElement);
         }
+        ground.dispose();
       };
     } catch (error) {
       console.error('Error initializing WebGL:', error);
