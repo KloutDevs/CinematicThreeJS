@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+    /* Fonts */
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+    /* Light Mode Colors */
+    --color-light-card: #FFFFFF;
+    --color-light-background: #F2F4FA;
+    --color-light-text: #1E2129;
+    --color-light-neutral: #DBDFE9;
+  
+    /* Dark Mode Colors */
+    --color-dark-card: #1E2129;
+    --color-dark-background: #111318;
+    --color-dark-text: #FFFFFF;
+    --color-dark-neutral: #454657;
+  
+    /* Primary Colors */
+    --color-primary: #38ACFF;
+    --color-primary-active: #63BEFF;
+    --color-primary-light: #000F1A;
+    --color-primary-opacity-20: #38ACFF33;
+  
+    /* Secondary Colors */
+    --color-secondary: #FF6480;
+    --color-secondary-active: #FF849B;
+    --color-secondary-light: #FFE6E7;
+    --color-secondary-opacity-20: #FF648033;
+  
+    /* Tertiary Colors */
+    --color-tertiary: #C86DFF;
+    --color-tertiary-active: #D38BFF;
+    --color-tertiary-light: #10001A;
+    --color-tertiary-opacity-20: #C86DFF33;
+  
+    /* Semantic Colors */
+    --color-danger: #F8285A;
+    --color-danger-active: #D81A48;
+    --color-danger-light: #FFEEF3;
+    --color-danger-opacity-20: #F8285A33;
+  
+    --color-success: #00A261;
+    --color-success-active: #01BF73;
+    --color-success-light: #1F2623;
+    --color-success-opacity-20: #00A26133;
+  
+    --color-warning: #F6B100;
+    --color-warning-active: #DFA000;
+    --color-warning-light: #FFF8DD;
+    --color-warning-opacity-20: #F6B10033;
+  
+    --color-info: #883FFF;
+    --color-info-active: #9E63FF;
+    --color-info-light: #272134;
+    --color-info-opacity-20: #883FFF33;
+  
+    /* Grey Scales */
+    --color-grey-100: #F9F9F9;
+    --color-grey-200: #F1F1F4;
+    --color-grey-300: #DBDFE9;
+    --color-grey-400: #C4CADA;
+    --color-grey-500: #99A1B7;
+    --color-grey-600: #78829D;
+    --color-grey-700: #4B5675;
+    --color-grey-800: #252F4A;
+    --color-grey-900: #071437;
+  
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+  
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+  
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.4s ease;
+  
+    /* Breakpoints */
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+    --breakpoint-xl: 1200px;
+  }
